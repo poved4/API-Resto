@@ -7,37 +7,38 @@ const queries = require("../src/query");
 const bcrypt = require('bcrypt');
 
 // //Registro
-router.post("/singIn", async (req, res) => {
-  const data = await singIn(req.body);
+router.post("/singUp", async (req, res) => {
+  const data = await singUp(req.body);
   res.status(data.code).json(data.message);
 });
-const singIn = async (data) => {
+const singUp = async (data) => {
   let msg = messages["wrongData"]; 
   try {
-      checker.singIn(data);
+      checker.singUp(data);
       if (await queries.selectEmail(data.email)) { throw "emailRegister"; }
       data.password = await bcrypt.hash(data.password, 10);
-      await queries.insertUser(data);
+      await queries.insertNewUser(data);
       msg = messages["created"]; 
-  } catch (e) { msg = messages[e]; } 
+  } catch (e) { msg = messages[e] || messages["server"]; } 
   finally { return msg; }  
 }
 
 //Inicio de Sesion
-router.post("/singUp", async (req, res) => {
-  const data = await singUp(req.body);
-  res.status(data.code).json(data.token ? {"token" : data.token} : {"msg": data.message});
+router.post("/singIn", async (req, res) => {
+  const data = await singIn(req.body);
+  res.status(data.code).json(data.token ? {"token" : data.token} : {"message": data.message});
 });
-const singUp = async ({email, password}) => {
+const singIn = async (obj) => {
   let msg = messages["wrongData"];
   try {
-      checker.password({email, password});
-      const data = await queries.selectEmail(email);
-      if (await bcrypt.compare(password, data.user_password)) { 
+      checker.mailCheck(obj.email);
+      const user = await queries.selectEmail(obj.email);
+      if(!user) throw "wrongData";
+      if (await bcrypt.compare(obj.password, user.user_password)) { 
         msg = messages["ok"];
-        msg.token = auth.codifyToken(data);
+        msg.token = auth.codifyToken(user);
       } 
-  } catch (e) { msg = messages[e]; } 
+  } catch (e) { msg = messages[e] || messages["server"]; } 
   finally { return msg; }
 }
 

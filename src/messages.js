@@ -6,7 +6,9 @@ const msg = {
     "Unauthorized": { code: 401, message: "Unauthorized" },
     "NotFound":     { code: 404, message: "Not Found"},
     "server":       { code: 500, message: "Internal Server Error"},
-    "emailRegister":{ code: 400, message: "Internal Server Error"}
+    
+    "emailRegister":{ code: 400, message: "Email registred"},
+    "emptyData":    { code: 400, message: "empty spaces"},
   }
 
 module.exports = { msg }
