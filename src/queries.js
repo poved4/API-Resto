@@ -2,15 +2,7 @@
 const Sequelize = require('sequelize');
 //const sequelize = new Sequelize('mysql://user:password@host:port/database');
 const sequelize = new Sequelize('mysql://root:My$QL;@localhost:3306/resto');
-
 const lib = require("./MyLib");
-
-const creado = '201 Created';
-const noContent = '204 No Content';
-const Unauthorized = '401 Unauthorized';
-const server = '500 Internal Server Error';
-const wrongData = '400 Invalid data supplied';
-const NotFound = '404 Not Found';
 
 async function InfoProducts(orderId) {
     const info = [];
@@ -25,32 +17,10 @@ async function InfoProducts(orderId) {
     }
     return info;
 }
-//________________________________USUARIOS____________________________________
-async function SingIn({user, fullName, email, phone, address, password}) {
-    if(!user || !fullName || !email || !phone || !address || !password) { throw wrongData }
-    const queryInsert = `INSERT INTO resto.users VALUES (null, 0, '${user}', '${fullName}', '${email}', '${phone}', '${address}', '${password}')`;
-    await sequelize.query(queryInsert); 
-}
-async function SingUp({email, password}) {
-    if(!email || !password)  { throw wrongData; }
-    const querySelect = `SELECT * FROM resto.users WHERE user_email = '${email}' AND user_password = '${password}'`;
-    const user = await sequelize.query(querySelect, { type: sequelize.QueryTypes.SELECT });
-    if(user.length === 0)  { throw wrongData; }
-    const userInfo = lib.CodeToken(user); 
-    return userInfo;
-}
-async function UserInfo(token) {
-    const idUser = lib.DecoToken(token);
-    const querySelect = `SELECT * FROM resto.users WHERE user_id = ${idUser.id};`;
-    const user = await sequelize.query(querySelect, { type: sequelize.QueryTypes.SELECT });
-    if(user.length === 0)  { throw server; }
-    delete user[0].user_password;
-    return user;
-}
 //______________________________CRUD PRODUCTOS________________________________
 async function GetProducts() {
-    const items = await sequelize.query('SELECT * FROM resto.products;', { type: sequelize.QueryTypes.SELECT });
-    return items;
+    return await sequelize.query('SELECT * FROM resto.products;', { type: sequelize.QueryTypes.SELECT });
+    
 }
 async function GetProductsByID(id) {
     const querySelect = `SELECT * FROM resto.products WHERE products_id = ${id};`;
@@ -151,7 +121,14 @@ async function DelecteOrder(id) {
 }
 
 module.exports = { 
-    SingIn, SingUp, UserInfo,
-    GetProducts, GetProductsByID, CreatedProduct, UpdateProduct, DeleteProduct,
-    MyOrders, NewOrder, Orders, UpdateOrderState, DelecteOrder
+    GetProducts, 
+    GetProductsByID, 
+    CreatedProduct, 
+    UpdateProduct, 
+    DeleteProduct,
+    MyOrders, 
+    NewOrder, 
+    Orders, 
+    UpdateOrderState, 
+    DelecteOrder
 }

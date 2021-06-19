@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const q = require("../src/queries");
+const lib = require("../src/MyLib");
 
 router.get("/productos", async (req, res) => {
   try {

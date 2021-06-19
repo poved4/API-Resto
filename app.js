@@ -3,7 +3,7 @@ const path = require("path");
 const express = require("express");
 const app = express();
 
-const routers = require(path.join(__dirname, "routes/routers.js"));
+const routers = require(path.join(__dirname, "routers/routers.js"));
 
 //______________________________SETTINGS
 //app.set("view-engine", "ejs");
@@ -12,7 +12,7 @@ app.set("port", process.env.PORT || 3000);
 
 //______________________________ROUTES && MIDDELWARES
 app.use(express.json());
-app.use("/", routers);
+app.use("/www.resto.com/", routers);
 
 //______________________________LISTENER SERVER
 const port = app.get("port");
