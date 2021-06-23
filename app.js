@@ -1,9 +1,8 @@
 const path = require("path");
-
 const express = require("express");
 const app = express();
 
-const routers = require(path.join(__dirname, "routers/routers.js"));
+const routers = require(path.join(__dirname, "/src/routes/routers"));
 
 //______________________________SETTINGS
 //app.set("view-engine", "ejs");
