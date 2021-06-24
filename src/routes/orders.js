@@ -1,93 +1,72 @@
 const router = require("express").Router();
 
-const queries = require("../query");
-const checker = require("../checker");
-const auth = require("../controllers/Authentication");
-const messages = require("../messages").msg;
+const checker = require("../controllers/checker");
+const queries = require("../controllers/queries");
+const appError = require("../controllers/appError");
+
+router.get("/me", async (req, res) => {
+  try {
+    const orders = await queries.selectUserOrders(req.user.id);
+    res.status(200).json({});
+  } catch (e) { 
+    const code = e.code || 500;
+    const message = e.message || "Internal Server Error";
+    res.status(code).json({message});
+  }
+});
+
+router.post("/me", async (req, res) => {
+  try { 
+    let totalPrice = 0, description = '';
+    const object = req.body.products;
+
+    for (const key in object) {
+      const product = await queries.selectProductID(object[key].id);
+      const subTotal = (product.products_Price * object[key].quatity);
+      description += `${object[key].quatity} ${product.products_Name}: ${subTotal} + `;
+      totalPrice += subTotal;    
+    }
+
+    const d = new Date();
+   
+    const order = {};
+    order.userID = req.user.id;
+    order.date = `${d.getFullYear()}-${d.getMonth()}-${d.getDay()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+    order.price = totalPrice;
+    order.wayToPay = req.body.wayToPay;
+    order.description = description;
+
+    await queries.insertNewOrder(order);
+    res.status(201).json({});
+
+  } catch (e) { 
+    const code = e.code || 500;
+    const message = e.message || "Internal Server Error";
+    res.status(code).json({message});
+  }
+});
 
 router.get("/", async (req, res) => {
-  let str = "server", data = {};
   try {
-    const headerAuth = req.headers.authorization;
-    const token = auth.decodifyToken(headerAuth);
-    const orders = await queries.selectOrders(token.id);
-    str = !orders ? "noContent" : "ok";
-    data = !orders ? {} : orders;
-  } catch (e) { str = e.message || "server"; }
-
-  res.status(messages[str].code).json(data); 
-});
-
-router.post("/", async (req, res) => {
-  try {
-    const bill = await newOrder(req.body);
-    res.status(201).json(bill);
-  } catch (error) {
-    res.status(400).json({ error });
+    if (req.user.rol != 1) throw new appError.unauthorized();
+    const orders = await queries.selectOrders();
+    res.status(200).json(orders);
+  } catch (e) { 
+    const code = e.code || 500;
+    const message = e.message || "Internal Server Error";
+    res.status(code).json({message});
   }
 });
 
-const newOrder = async ({wayToPay, products, hearderAuth}) => {
-  console.log(`\n\n*** Hello from NewOrder`);
-  let totalPrice = 0, description = '';
-  const shoppingList = [];
-
-  for (const key in products) {
-      const product = products[key];
-      const infoProduct = await queries.selectProductID(product.id);
-
-      let item = {
-          "name": infoProduct.products_Name,
-          "price": infoProduct.products_Price,
-          "quatity": product.quatity,
-          "subTotal": (infoProduct.products_Price * product.quatity)
-      }
-
-      description += `${item.name}: ${item.quatity} *  ${item.price} = ${item.subTotal}\n`;
-      totalPrice += item.subTotal;
-      shoppingList.push(item);
-  }
-
-  //insertar order
-}
-
-
-
-router.get("/pedidos/", auth.managerAuth, async (req, res) => {
+router.patch("/", async (req, res) => {
   try {
-    const orders = await q.Orders();
-    if (orders.length === 0) {
-      res.status(204);
-      res.json(orders);
-    } else {
-      res.status(200);
-      res.json(orders);
-    }
-  } catch (error) {
-    res.status(500);
-    res.json({ error });
-  }
-});
-
-router.patch("/pedidos", auth.managerAuth, async (req, res) => {
-  try {
-    const order = await q.UpdateOrderState(req.body);
-    res.status(200);
-    res.json(order);
-  } catch (error) {
-    res.status(400);
-    res.json({ error });
-  }
-});
-
-router.delete("/pedidos/:id", auth.managerAuth, async (req, res) => {
-  try {
-    await q.DelecteOrder(req.params.id);
-    res.status(204);
-    res.json({});
-  } catch (error) {
-    res.status(400);
-    res.json({ error });
+    if (req.user.rol != 1) throw new appError.unauthorized();
+    const order = await queries.updateOrderState(req.body);
+    res.status(304).json({});
+  } catch (e) { 
+    const code = e.code || 500;
+    const message = e.message || "Internal Server Error";
+    res.status(code).json({message});
   }
 });
 

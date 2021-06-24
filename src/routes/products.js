@@ -3,7 +3,6 @@ const router = require("express").Router();
 const queries = require("../controllers/queries");
 const checker = require("../controllers/checker");
 const appError = require("../controllers/appError");
-const auth = require("../controllers/Authentication");
 
 router.get("/", async (req, res) => {
   try {
@@ -11,8 +10,9 @@ router.get("/", async (req, res) => {
     if (!products) throw new appError.noContent();
     res.status(200).json(products);
   } catch (e) { 
+    const code = e.code || 500;
     const message = e.message || "Internal Server Error";
-    res.status(e.code || 500).json(message);
+    res.status(code).json({message});
   }
 });
 
@@ -22,11 +22,12 @@ router.get("/:id", async (req, res) => {
     if (!product) throw new appError.noContent();
     res.status(200).json(product);
   } catch (e) { 
+    const code = e.code || 500;
     const message = e.message || "Internal Server Error";
-    res.status(e.code || 500).json({message});
+    res.status(code).json({message});
   }
 });
-//revisar checker
+
 router.post("/", async (req, res) => {
   try {
     if (req.user.rol != 1) throw new appError.unauthorized();
@@ -34,30 +35,34 @@ router.post("/", async (req, res) => {
     await queries.insertNewProduct(req.body); 
     res.status(200).json({});
   } catch (e) { 
+    const code = e.code || 500;
     const message = e.message || "Internal Server Error";
-    res.status(e.code || 500).json({message});
+    res.status(code).json({message});
   }
 });
-//falta checker
+
 router.patch("/", async (req, res) => {
   try {
     if (req.user.rol != 1) throw new appError.unauthorized();
+    checker.numberCheck(req.body.price);
     await queries.updateProductId(req.body);
     res.status(200).json({});
   } catch (e) { 
+    const code = e.code || 500;
     const message = e.message || "Internal Server Error";
-    res.status(e.code || 500).json({message});
+    res.status(code).json({message});
   }
 });
-//checker id only number
+
 router.delete("/:id", async (req, res) => {
   try {
     if (req.user.rol != 1) throw new appError.unauthorized();
     await queries.deleteProductId(req.params.id);
     res.status(200).json({});
   } catch (e) { 
+    const code = e.code || 500;
     const message = e.message || "Internal Server Error";
-    res.status(e.code || 500).json({message});
+    res.status(code).json({message});
   }
 });
 

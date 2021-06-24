@@ -2,7 +2,16 @@ const Sequelize = require('sequelize');
 //const sequelize = new Sequelize('mysql://user:password@host:port/database');
 const sequelize = new Sequelize('mysql://root:My$QL;@localhost:3306/resto');
 
+const appError = require("../controllers/appError");
+
 //USER
+exports.selectAll = async () => {
+    const query = `SELECT * FROM resto.users;`;
+    const data = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+    if (data.length === 0) throw new appError.noContent("No data");
+    return data;
+}
+
 exports.selectEmail = async (email) => {
     const query = `SELECT * FROM resto.users WHERE user_email = "${email}";`;
     const data = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
@@ -43,8 +52,26 @@ exports.deleteProductId = async(id) => {
 }
 
 //ORDERS
-exports.selectOrders = async(userId) => {
+exports.selectOrders = async() => {
+    const query = `SELECT * FROM orders;`;
+    const data = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+    if (data.length === 0) throw new appError.noContent("No orders");
+    return data;
+}
+
+exports.selectUserOrders = async(userId) => {
     const query = `SELECT * FROM orders WHERE fk_user_id = ${userId};`;
     const data = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
-    return data.length === 0? false : data;
+    if (data.length === 0) throw new appError.noContent("No orders");
+    return data;
+}
+
+exports.insertNewOrder = async({userID, date, price, wayToPay, description}) => {
+    const query = `INSERT INTO resto.orders VALUES (Null, '${userID}', 'nuevo', '${date}', '${price}', '${wayToPay}', '${description}');`;
+    return await sequelize.query(query); 
+}
+
+exports.updateOrderState = async({state, id}) => {
+    const query = `UPDATE resto.orders SET order_state = '${state}' WHERE order_id = ${id};`;
+    return await sequelize.query(query); 
 }

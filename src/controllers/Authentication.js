@@ -23,6 +23,6 @@ exports.authenticateToken = (req, res, next) => {
     } catch (e) { 
         const code = e.code || 500;
         const message = e.message || "Internal Server Error";
-        res.status(code).json(message);
+        res.status(code).json({message});
     }
 }

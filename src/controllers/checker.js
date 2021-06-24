@@ -5,7 +5,7 @@ empty = (obj) => {
     if (empty) throw new errBadReuest("empty Data");
 }
 
-mailCheck = (value) => {
+email = (value) => {
     const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     if (!regex.test(value)) throw new errBadReuest("invalid email");
 }
@@ -19,21 +19,29 @@ passwordCheck = (value) => {
 }
 
 /*Valid a phone number like XXX-XXX-XXXX */
-numberCheck = (value) => {
+numberPhoneCheck = (value) => {
     const regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if(!regex.test(value)) throw new errBadReuest("only numbers");
+}
+
+number = (value) => {
+    const regex = /^-?\d+\.?\d*$/;
     if(!regex.test(value)) throw new errBadReuest("only numbers");
 }
 
 /*Username must have alphabet characters only*/
 letterCheck = (value) => {
     const regex = /^[A-Za-z]+$/;
-    if(!regex.test(value)) throw new errBadReuest("only letters");
+    let valueCut = value.split(' ');
+
+    for (const it of valueCut) {
+        if(!regex.test(it)) throw new errBadReuest("only letters");
+    }
 }
 
-exports.mailCheck = (value) => {
-    const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    if (!regex.test(value)) throw new errBadReuest("invalid email");
-}
+exports.numberCheck = value => number(value);
+
+exports.mailCheck = value => email(value);
 
 exports.singUp = (obj) => {
     empty(obj);
@@ -41,13 +49,14 @@ exports.singUp = (obj) => {
     if (!user || !fullName || !email || !phone || !address || !password) throw new errBadReuest("missing data");
     
     mailCheck(email)
-    passwordCheck(password);
-    numberCheck(phone);
     letterCheck(fullName);
+    passwordCheck(password);
+    numberPhoneCheck(phone);
 }
+
 //revisar
 exports.newProduct = ({price, name, link_img}) => {
     empty({price, name, link_img});
     if (!price || !name || !link_img) throw new errBadReuest("missing data");
-    // letterCheck(name); numberCheck(price);
+    letterCheck(name); numberCheck(price);
 }

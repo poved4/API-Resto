@@ -31,7 +31,7 @@ class noContent extends Error {
     constructor(message = "No Content") {
         super(message);
         this.code = 204;
-        this.name = "No Content";
+        this.name = "No content";
     }
 }
 
@@ -68,7 +68,7 @@ class forbidden extends Error {
 }
 
 class notFound extends Error {
-    constructor(message) {
+    constructor(message = "Not found") {
         super(message);
         this.code = 404;
         this.name = "Not found";
@@ -76,15 +76,15 @@ class notFound extends Error {
 }
 
 class serverError extends Error {
-    constructor(message) {
+    constructor(message = "Internal Server Error") {
         super(message);
         this.code = 500;
-        this.name = "Internal Server Error";
+        this.name = "Server Error";
     }
 }
 
 class notImplemented extends Error {
-    constructor(message) {
+    constructor(message = "Not Implemented") {
         super(message);
         this.code = 501;
         this.name = "Not Implemented";

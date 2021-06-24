@@ -6,6 +6,12 @@ const queries = require("../controllers/queries");
 const AppError = require("../controllers/appError");
 const auth = require("../controllers/Authentication");
 
+// router.get("/", async (req, res) => {
+//   const users = await queries.selectAll();
+//   console.log(users);
+//   res.status(200).json(users);
+// });
+
 router.post("/singUp", async (req, res) => {
     try {
         checker.singUp(req.body);
@@ -35,10 +41,11 @@ router.post("/singIn", async (req, res)=> {
             });
             res.status(201).json({ token });
         } 
+        else throw new AppError.badRequest("Wrong email or password");
     }  catch (e) { 
         const code = e.code || 500;
         const message = e.message || "Internal Server Error";
-        res.status(code).json(message);
+        res.status(code).json({message});
     } 
 });
 
